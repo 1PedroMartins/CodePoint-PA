@@ -12,10 +12,21 @@ app.use(express.json());
 
 
 // Rotas
+const candidaturaRoutes = require('./routes/candidatura.route');
+const stockLoteRoutes = require('./routes/stockLote.route');
+const chatRoutes = require('./routes/chat.route');
+const mensagemRoutes = require('./routes/mensagem.route');
+const movimentoStockRoutes = require('./routes/movimentoStock.route');
 const produtoRoutes = require('./routes/produto.route');
 const campanhaRoutes = require('./routes/campanha.route');
 const userRoutes = require('./routes/user.route');
 const notificacaoRoutes = require('./routes/notificacao.route');
+
+app.use('/candidatura',candidaturaRoutes)
+app.use('/chat', chatRoutes)
+app.use('/mensagem', mensagemRoutes)
+app.use('/stocklote', stockLoteRoutes);
+app.use('/movimentoStock', movimentoStockRoutes);
 app.use('/produto', produtoRoutes);
 app.use('/campanha', campanhaRoutes);
 app.use('/user', userRoutes);
