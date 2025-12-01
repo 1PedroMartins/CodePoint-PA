@@ -1,38 +1,66 @@
-const movimentoStockService = require('../services/movimentostock.service');
-
-async function createMovimento(req, res) {
-    try {
-        const { stockLoteId } = req.params;
-
-        const movimento = await movimentoStockService.createMovimento(stockLoteId, req.body);
-        res.status(201).json(movimento);
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao criar movimento", detalhes: error.message });
-    }
-}
-
-async function getMovimento(req, res) {
-    try {
-        const { stockLoteId, movimentoId } = req.params;
-
-        const movimento = await movimentoStockService.getMovimento(stockLoteId, movimentoId);
-        res.status(200).json(movimento);
-    } catch (error) {
-        res.status(404).json({ error: "Movimento não encontrado" });
-    }
-}
-
-async function getMovimentosByStockLote(req, res) {
-    try {
-        const movimentos = await movimentoStockService.getMovimentosByStockLote(req.params.stockLoteId);
-        res.status(200).json(movimentos);
-    } catch (error) {
-        res.status(500).json({ error: "Erro ao listar movimentos" });
-    }
-}
+const service = require("../services/movimentostock.service");
 
 module.exports = {
-    createMovimento,
-    getMovimento,
-    getMovimentosByStockLote
+  criar: async (req, res) => {
+    try {
+      const mov = await service.registarMovimento({
+        tipo: req.body.tipo,
+        quantidade: req.body.quantidade,
+        userId: req.user.uid,
+        motivo: req.body.motivo,
+        entregaId: req.body.entregaId,
+        stockLoteId: req.body.stockLoteId
+      });
+
+      res.status(201).json(mov);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  listar: async (req, res) => {
+    try {
+      const movimentos = await service.listarMovimentos();
+      res.json(movimentos);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  listarPorStockLote: async (req, res) => {
+    try {
+      const lista = await service.listarPorStockLote(req.params.stockLoteId);
+      res.json(lista);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  listarPorEntrega: async (req, res) => {
+    try {
+      const lista = await service.listarPorEntrega(req.params.entregaId);
+      res.json(lista);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  obter: async (req, res) => {
+    try {
+      const mov = await service.obterMovimento(req.params.id);
+      if (!mov) return res.status(404).json({ error: "Movimento não encontrado" });
+      res.json(mov);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  },
+
+  apagar: async (req, res) => {
+    try {
+      await service.apagarMovimento(req.params.id);
+      res.status(204).send();
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  }
 };

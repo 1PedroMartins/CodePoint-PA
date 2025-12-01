@@ -1,16 +1,30 @@
-const express = require('express');
-const stockLoteController = require('../controllers/stocklote.controller');
-
+const express = require("express");
 const router = express.Router();
+const controller = require("../controllers/stocklote.controller");
+const { verifyToken, requireRole } = require("../middleware/auth.middleware");
 
-router.post('/criarStockLote', stockLoteController.createStockLote);
-router.get('/:id', stockLoteController.getStockLote);
-router.get('/produto/:produtoId', stockLoteController.getStockLotesByProduto);
-router.patch('/:id', stockLoteController.updateStockLote);
-router.delete('/:id', stockLoteController.deleteStockLote);
+// Criar lote de stock
+router.post("/", verifyToken, requireRole("tecnico"), controller.criar);
 
-router.post('/:id/incrementar', stockLoteController.incrementarStock);
-router.post('/:id/decrementar', stockLoteController.decrementarStock);
-router.get('/:id/verificarValidade', stockLoteController.verificarValidade);
+// Obter lote
+router.get("/:id", verifyToken, controller.obter);
+
+// Atualizar lote
+router.put("/:id", verifyToken, requireRole("tecnico"), controller.atualizar);
+
+// Incrementar quantidade
+router.post("/:id/incrementar", verifyToken, requireRole("tecnico"), controller.incrementar);
+
+// Decrementar quantidade
+router.post("/:id/decrementar", verifyToken, requireRole("tecnico"), controller.decrementar);
+
+// Verificar validade
+router.get("/:id/validade", verifyToken, controller.validade);
+
+// Listar lotes por produto
+router.get("/produto/:produtoId", verifyToken, controller.listarPorProduto);
+
+// Apagar lote
+router.delete("/:id", verifyToken, requireRole("admin"), controller.apagar);
 
 module.exports = router;
