@@ -1,4 +1,4 @@
-const campanhaService = require('../services/produto.service');
+const campanhaService = require('../services/campanha.service');
 
 async function createCampanha(req, res) {
     try {
