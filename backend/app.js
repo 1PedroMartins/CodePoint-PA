@@ -9,9 +9,18 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+
+
 // Rotas
 const produtoRoutes = require('./routes/produto.route');
+const campanhaRoutes = require('./routes/campanha.route');
+const userRoutes = require('./routes/user.route');
+const notificacaoRoutes = require('./routes/notificacao.route');
 app.use('/produto', produtoRoutes);
+app.use('/campanha', campanhaRoutes);
+app.use('/user', userRoutes);
+app.use('/notificacao', notificacaoRoutes);
+
 
 // Rota de teste
 app.get("/", (req, res) => {
