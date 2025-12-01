@@ -12,7 +12,7 @@ async function updateProduto(id, data){
     return produto
 }
 
-async function getproduto(id) {
+async function getProduto(id) {
     const produto = db.collection("produtos").doc(id).get()
     return produto;
 }
@@ -21,4 +21,4 @@ async function deleteProduto(id) {
     return db.collection("produtos").doc("id").delete();
 }
 
-module.exports = { createProduto, deleteProduto, getproduto,updateProduto };
+module.exports = { createProduto, deleteProduto, getProduto,updateProduto };
