@@ -1,10 +1,10 @@
-const service = require("../services/produto.service");
+const service = require("../services/campanha.service");
 
 module.exports = {
   criar: async (req, res) => {
     try {
-      const produto = await service.criarProduto(req.body);
-      res.status(201).json(produto);
+      const campanha = await service.criarCampanha(req.body);
+      res.status(201).json(campanha);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -12,8 +12,8 @@ module.exports = {
 
   listar: async (req, res) => {
     try {
-      const produtos = await service.listarProdutos();
-      res.json(produtos);
+      const campanhas = await service.listarCampanhas();
+      res.json(campanhas);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -21,9 +21,9 @@ module.exports = {
 
   obter: async (req, res) => {
     try {
-      const produto = await service.obterProduto(req.params.id);
-      if (!produto) return res.status(404).json({ error: "Produto não encontrado" });
-      res.json(produto);
+      const campanha = await service.obterCampanha(req.params.id);
+      if (!campanha) return res.status(404).json({ error: "Campanha não encontrada" });
+      res.json(campanha);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -31,8 +31,8 @@ module.exports = {
 
   atualizar: async (req, res) => {
     try {
-      const produto = await service.atualizarProduto(req.params.id, req.body);
-      res.json(produto);
+      const campanha = await service.atualizarCampanha(req.params.id, req.body);
+      res.json(campanha);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -40,7 +40,7 @@ module.exports = {
 
   apagar: async (req, res) => {
     try {
-      await service.apagarProduto(req.params.id);
+      await service.apagarCampanha(req.params.id);
       res.status(204).send();
     } catch (err) {
       res.status(500).json({ error: err.message });

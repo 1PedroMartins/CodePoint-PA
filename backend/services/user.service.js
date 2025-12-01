@@ -1,45 +1,69 @@
-const { db } = require("../config/firebase.js");
+const { db, admin } = require("../config/firebase");
+const collection = db.collection("users");
 
-async function createUser(data){
-    const user = await db.collection("users").add(data);
-    return user;
+async function criarUser(data) {
+  // Criar utilizador no Firebase Auth
+  const fbUser = await admin.auth().createUser({
+    email: data.email,
+    password: data.password,
+    displayName: data.nome
+  });
+
+  const userData = {
+    uid: fbUser.uid,
+    nome: data.nome,
+    email: data.email,
+    role: data.role || "beneficiario", // técnico | admin | beneficiário
+    contacto: data.contacto || null,
+    criadoEm: new Date()
+  };
+
+  // Guardar no Firestore
+  await collection.doc(fbUser.uid).set(userData);
+
+  // Atribuir role como custom claim
+  await admin.auth().setCustomUserClaims(fbUser.uid, {
+    role: userData.role
+  });
+
+  return userData;
 }
 
-async function updateUser(id, data){
-    await db.collection("users").doc(id).update(data);
-    return { id, ...data };
+async function listarUsers() {
+  const snap = await collection.get();
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-async function getUser(id) {   //ver se este fuciona 
-    const doc = await db.collection("users").doc(id).get();
-    if (!doc.exists) {
-        throw new Error("User não encontrado");
-    }
-    return { id: doc.id, ...doc.data() };
+async function obterUser(uid) {
+  const doc = await collection.doc(uid).get();
+  if (!doc.exists) return null;
+
+  return { id: doc.id, ...doc.data() };
 }
 
-async function getUserByEmail(email) {   //ver se este fuciona 
-    const snapshot = await db.collection("users").where("email", "==", email).limit(1).get();
-    const doc = snapshot.docs[0];
-    return { id: doc.id, ...doc.data() };
+async function atualizarPerfil(uid, updates) {
+  await collection.doc(uid).update(updates);
+
+  // Se mudar role, atualizar claims do Firebase Auth
+  if (updates.role) {
+    await admin.auth().setCustomUserClaims(uid, { role: updates.role });
+  }
+
+  return obterUser(uid);
 }
 
-async function getUsersByCargo(cargo) {
-    const snapshot = await db.collection("users").where("cargo", "==", cargo).get();
-    
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+async function apagarUser(uid) {
+  // Remover do Auth
+  await admin.auth().deleteUser(uid);
+
+  // Remover do Firestore
+  await collection.doc(uid).delete();
 }
 
-async function deleteUser(id) {
-    await db.collection("users").doc(id).delete();
-    return { id, deleted: true };
-}
-
-module.exports = { 
-    createUser, 
-    updateUser, 
-    getUser, 
-    getUserByEmail,
-    getUsersByCargo,
-    deleteUser 
+module.exports = {
+  criarUser,
+  listarUsers,
+  obterUser,
+  atualizarPerfil,
+  apagarUser
 };

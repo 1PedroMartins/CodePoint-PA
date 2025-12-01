@@ -1,90 +1,49 @@
-const notificacaoService = require('../services/notificacao.service');
+const service = require("../services/notificacao.service");
 
-async function createNotificacao(req, res) {
+module.exports = {
+  criar: async (req, res) => {
     try {
-        if (!req.body) {
-            return res.status(400).json({ error: "Corpo da requisição vazio" });
-        }
-
-        const { tipo, destinatarioId, titulo, mensagem } = req.body;
-        
-        if (!tipo || !destinatarioId || !titulo || !mensagem) {
-            return res.status(400).json({ error: "Tipo, destinatarioId, titulo e mensagem são obrigatórios" });
-        }
-
-        const notificacao = await notificacaoService.createNotificacao(req.body);
-        res.status(201).json(notificacao);
-    } catch (error) {
-        console.error("Erro ao criar Notificação:", error);
-        res.status(500).json({ error: "Erro ao criar Notificação", detalhes: error.message });
+      const notificacao = await service.criarNotificacao(req.body);
+      res.status(201).json(notificacao);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
-}
+  },
 
-async function getNotificacao(req, res) {
+  listar: async (req, res) => {
     try {
-        const { id } = req.params;
-        const notificacao = await notificacaoService.getNotificacao(id);
-        res.status(200).json(notificacao);
-    } catch (error) {
-        console.error("Erro ao buscar Notificação:", error);
-        res.status(404).json({ error: "Notificação não encontrada", detalhes: error.message });
+      const lista = await service.listarNotificacoes(req.params.destinatarioId);
+      res.json(lista);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
-}
+  },
 
-async function getNotificacoesByDestinatario(req, res) {
+  obter: async (req, res) => {
     try {
-        const { destinatarioId } = req.params;
-        const notificacoes = await notificacaoService.getNotificacoesByDestinatario(destinatarioId);
-        res.status(200).json(notificacoes);
-    } catch (error) {
-        console.error("Erro ao buscar Notificações:", error);
-        res.status(500).json({ error: "Erro ao buscar Notificações", detalhes: error.message });
+      const notif = await service.obterNotificacao(req.params.id);
+      if (!notif) return res.status(404).json({ error: "Notificação não encontrada" });
+      res.json(notif);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
-}
+  },
 
-async function getNotificacoesNaoLidas(req, res) {
+  marcarComoLida: async (req, res) => {
     try {
-        const { destinatarioId } = req.params;
-        const notificacoes = await notificacaoService.getNotificacoesNaoLidas(destinatarioId);
-        res.status(200).json(notificacoes);
-    } catch (error) {
-        console.error("Erro ao buscar Notificações não lidas:", error);
-        res.status(500).json({ error: "Erro ao buscar Notificações", detalhes: error.message });
+      const notif = await service.marcarComoLida(req.params.id);
+      res.json(notif);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
-}
+  },
 
-async function updateNotificacao(req, res) {
+  apagar: async (req, res) => {
     try {
-        const { id } = req.params;
-        
-        if (!req.body || Object.keys(req.body).length === 0) {
-            return res.status(400).json({ error: "Corpo da requisição vazio" });
-        }
-
-        const notificacao = await notificacaoService.updateNotificacao(id, req.body);
-        res.status(200).json(notificacao);
-    } catch (error) {
-        console.error("Erro ao atualizar Notificação:", error);
-        res.status(500).json({ error: "Erro ao atualizar Notificação", detalhes: error.message });
+      await service.apagarNotificacao(req.params.id);
+      res.status(204).send();
+    } catch (err) {
+      res.status(500).json({ error: err.message });
     }
-}
-
-async function deleteNotificacao(req, res) {
-    try {
-        const { id } = req.params;
-        const result = await notificacaoService.deleteNotificacao(id);
-        res.status(200).json(result);
-    } catch (error) {
-        console.error("Erro ao eliminar Notificação:", error);
-        res.status(500).json({ error: "Erro ao eliminar Notificação", detalhes: error.message });
-    }
-}
-
-module.exports = { 
-    createNotificacao, 
-    getNotificacao,
-    getNotificacoesByDestinatario,
-    getNotificacoesNaoLidas,
-    updateNotificacao, 
-    deleteNotificacao 
+  }
 };

@@ -1,19 +1,27 @@
 const express = require("express");
 const router = express.Router();
-const controller = require("../controllers/produto.controller");
+const controller = require("../controllers/beneficiario.controller");
 const { verifyToken, requireRole } = require("../middleware/auth.middleware");
 
-// Técnicos podem criar / editar
+// Criar beneficiário (técnico)
 router.post("/", verifyToken, requireRole("tecnico"), controller.criar);
 
-// Todos autenticados podem ver produtos
+// Listar beneficiários
 router.get("/", verifyToken, controller.listar);
+
+// Obter beneficiário
 router.get("/:id", verifyToken, controller.obter);
 
-// Atualizar
+// Atualizar dados gerais
 router.put("/:id", verifyToken, requireRole("tecnico"), controller.atualizar);
 
-// Só admins podem apagar
+// Atualizar estado do beneficiário
+router.patch("/:id/estado", verifyToken, requireRole("tecnico"), controller.atualizarEstado);
+
+// Adicionar observação ao beneficiário
+router.patch("/:id/observacoes", verifyToken, requireRole("tecnico"), controller.adicionarObservacao);
+
+// Apagar beneficiário (apenas admin)
 router.delete("/:id", verifyToken, requireRole("admin"), controller.apagar);
 
 module.exports = router;

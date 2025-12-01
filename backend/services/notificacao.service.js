@@ -1,42 +1,49 @@
-const { db } = require("../config/firebase.js");
+const { db } = require("../config/firebase");
+const collection = db.collection("notificacoes");
 
-async function createNotificacao(data){
-    const notificacao = await db.collection("notificacoes").add(data);
-    return notificacao;
+async function criarNotificacao(data) {
+  const notificacao = {
+    destinatarioId: data.destinatarioId,
+    titulo: data.titulo,
+    mensagem: data.mensagem,
+    tipo: data.tipo || "INFO",
+    estado: "NAO_LIDA",
+    dataEnvio: new Date()
+  };
+
+  const docRef = await collection.add(notificacao);
+  return { id: docRef.id, ...notificacao };
 }
 
-async function updateNotificacao(id, data){
-    await db.collection("notificacoes").doc(id).update(data);
-    return { id, ...data };
+async function listarNotificacoes(destinatarioId) {
+  const snap = await collection
+    .where("destinatarioId", "==", destinatarioId)
+    .orderBy("dataEnvio", "desc")
+    .get();
+
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-async function getNotificacao(id) {
-    const doc = await db.collection("notificacoes").doc(id).get();
-    return { id: doc.id, ...doc.data() };
+async function obterNotificacao(id) {
+  const doc = await collection.doc(id).get();
+  if (!doc.exists) return null;
+
+  return { id: doc.id, ...doc.data() };
 }
 
-async function getNotificacoesByDestinatario(destinatarioId) {
-    const snapshot = await db.collection("notificacoes").where("destinatarioId", "==", destinatarioId).orderBy("dataEnvio", "desc").get();
-    
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+async function marcarComoLida(id) {
+  await collection.doc(id).update({ estado: "LIDA" });
+  return obterNotificacao(id);
 }
 
-async function getNotificacoesNaoLidas(destinatarioId) {
-    const snapshot = await db.collection("notificacoes").where("destinatarioId", "==", destinatarioId).where("estado", "==", "nao_lida").orderBy("dataEnvio", "desc").get();
-    
-     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+async function apagarNotificacao(id) {
+  await collection.doc(id).delete();
 }
 
-async function deleteNotificacao(id) {
-    await db.collection("notificacoes").doc(id).delete();
-    return { id, deleted: true };
-}
-
-module.exports = { 
-    createNotificacao, 
-    updateNotificacao, 
-    getNotificacao, 
-    getNotificacoesByDestinatario,
-    getNotificacoesNaoLidas,
-    deleteNotificacao 
+module.exports = {
+  criarNotificacao,
+  listarNotificacoes,
+  obterNotificacao,
+  marcarComoLida,
+  apagarNotificacao
 };

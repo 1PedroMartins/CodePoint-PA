@@ -1,24 +1,35 @@
-const { db } = require("../config/firebase.js");
+const { db } = require("../config/firebase");
+const collection = db.collection("produtos");
 
-async function createProduto(data){
-    const produto = db.collection("produtos").add(data)
-
-    return produto
+async function criarProduto(data) {
+  const docRef = await collection.add(data);
+  return { id: docRef.id, ...data };
 }
 
-async function updateProduto(id, data){
-    const produto = db.collection("produtos").doc(id).update(data)
-
-    return produto
+async function listarProdutos() {
+  const snap = await collection.get();
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-async function getProduto(id) {
-    const produto = db.collection("produtos").doc(id).get()
-    return produto;
+async function obterProduto(id) {
+  const doc = await collection.doc(id).get();
+  if (!doc.exists) return null;
+  return { id: doc.id, ...doc.data() };
 }
 
-async function deleteProduto(id) {
-    return db.collection("produtos").doc("id").delete();
+async function atualizarProduto(id, data) {
+  await collection.doc(id).update(data);
+  return obterProduto(id);
 }
 
-module.exports = { createProduto, deleteProduto, getProduto,updateProduto };
+async function apagarProduto(id) {
+  await collection.doc(id).delete();
+}
+
+module.exports = {
+  criarProduto,
+  listarProdutos,
+  obterProduto,
+  atualizarProduto,
+  apagarProduto,
+};

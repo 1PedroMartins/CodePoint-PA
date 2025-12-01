@@ -1,13 +1,21 @@
-const express = require('express');
-const notificacaoController = require('../controllers/notificacao.controller');
-
+const express = require("express");
 const router = express.Router();
+const controller = require("../controllers/notificacao.controller");
+const { verifyToken, requireRole } = require("../middleware/auth.middleware");
 
-router.post('/criarNotificacao', notificacaoController.createNotificacao);
-router.get('/:id', notificacaoController.getNotificacao);
-router.get('/destinatario/:destinatarioId', notificacaoController.getNotificacoesByDestinatario);
-router.get('/nao-lidas/:destinatarioId', notificacaoController.getNotificacoesNaoLidas);
-router.patch('/:id', notificacaoController.updateNotificacao);
-router.delete('/:id', notificacaoController.deleteNotificacao);
+// Criar notificação (técnico ou sistema)
+router.post("/", verifyToken, requireRole("tecnico"), controller.criar);
+
+// Listar notificações de um utilizador
+router.get("/:destinatarioId", verifyToken, controller.listar);
+
+// Obter notificação
+router.get("/detalhe/:id", verifyToken, controller.obter);
+
+// Marcar como lida
+router.patch("/:id/lida", verifyToken, controller.marcarComoLida);
+
+// Apagar notificação
+router.delete("/:id", verifyToken, controller.apagar);
 
 module.exports = router;

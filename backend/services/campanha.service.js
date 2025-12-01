@@ -1,28 +1,44 @@
-const { db } = require("../config/firebase.js");
+const { db } = require("../config/firebase");
+const collection = db.collection("campanhas");
 
-async function createCampanha(data){
-    const campanha = db.collection("campanhas").add(data)
-    return campanha
+async function criarCampanha(data) {
+  const campanha = {
+    titulo: data.titulo,
+    descricao: data.descricao,
+    dataInicio: data.dataInicio ? new Date(data.dataInicio) : null,
+    dataFim: data.dataFim ? new Date(data.dataFim) : null,
+    ativa: data.ativa ?? true,
+    criadaEm: new Date()
+  };
+
+  const docRef = await collection.add(campanha);
+  return { id: docRef.id, ...campanha };
 }
 
-async function updateCampanha(id, data){
-    const campanha = db.collection("campanhas").doc(id).update(data)
-    return campanha
+async function listarCampanhas() {
+  const snap = await collection.get();
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-async function getCampanha(id) {
-    const campanha = db.collection("campanhas").doc(id).get()
-    return campanha;
+async function obterCampanha(id) {
+  const doc = await collection.doc(id).get();
+  if (!doc.exists) return null;
+  return { id: doc.id, ...doc.data() };
 }
 
-async function getCampanhasPorEstado(estado) {
-    const snapshot = await db.collection("campanhas").where("estado", "==", estado).get();
-
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+async function atualizarCampanha(id, data) {
+  await collection.doc(id).update(data);
+  return obterCampanha(id);
 }
 
-async function deleteCampanha(id) {
-    return db.collection("campanhas").doc("id").delete();
+async function apagarCampanha(id) {
+  await collection.doc(id).delete();
 }
 
-module.exports = { createCampanha, updateCampanha, getCampanha, deleteCampanha, getCampanhasPorEstado};
+module.exports = {
+  criarCampanha,
+  listarCampanhas,
+  obterCampanha,
+  atualizarCampanha,
+  apagarCampanha
+};
