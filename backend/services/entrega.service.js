@@ -17,6 +17,7 @@ async function agendarEntrega(data) {
   return { id: docRef.id, ...entrega };
 }
 
+//talvez não vamos utilizar
 async function obterEntrega(id) {
   const doc = await collection.doc(id).get();
   if (!doc.exists) return null;
@@ -29,12 +30,16 @@ async function atualizarEntrega(id, data) {
   return obterEntrega(id);
 }
 
+
+
 async function alterarEstado(id, novoEstado) {
   const updates = { estado: novoEstado };
 
   if (novoEstado === "ENTREGUE") {
     updates.dataRealizada = new Date();
   }
+
+  // em não entregue repor em stock
 
   await collection.doc(id).update(updates);
   return obterEntrega(id);
@@ -60,6 +65,8 @@ async function listarPorBeneficiario(beneficiarioId) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
+
+ //repor em stock
 async function apagarEntrega(id) {
   // apagar itens associados
   const itensSnap = await collection.doc(id).collection("itens").get();

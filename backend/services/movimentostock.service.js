@@ -21,21 +21,16 @@ async function listarMovimentos() {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-async function listarPorStockLote(stockLoteId) {
-  const snap = await collection
-    .where("stockLoteId", "==", stockLoteId)
-    .orderBy("data", "desc")
-    .get();
 
+//talvez não vamos precisar
+async function listarPorStockLote(stockLoteId) {
+  const snap = await collection.where("stockLoteId", "==", stockLoteId).orderBy("data", "desc").get();
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
+//talvez não vamos precisar
 async function listarPorEntrega(entregaId) {
-  const snap = await collection
-    .where("entregaId", "==", entregaId)
-    .orderBy("data", "desc")
-    .get();
-
+  const snap = await collection.where("entregaId", "==", entregaId).orderBy("data", "desc").get();
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 

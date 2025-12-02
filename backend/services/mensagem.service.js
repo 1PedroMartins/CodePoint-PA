@@ -13,9 +13,7 @@ async function enviarMensagem(chatId, data) {
   const docRef = await col.add(mensagem);
 
   // atualizar última atividade do chat
-  await db.collection("chats").doc(chatId).update({
-    ultimaUpdate: new Date()
-  });
+  await atualizarChat(id)
 
   return { id: docRef.id, ...mensagem };
 }
@@ -28,26 +26,38 @@ async function listarMensagens(chatId) {
 }
 
 async function obterMensagem(chatId, mensagemId) {
-  const doc = await db
-    .collection("chats").doc(chatId)
-    .collection("mensagens").doc(mensagemId)
-    .get();
-
+  const doc = await db.collection("chats").doc(chatId).collection("mensagens").doc(mensagemId).get();
   if (!doc.exists) return null;
   return { id: doc.id, ...doc.data() };
 }
 
 async function marcarComoLida(chatId, mensagemId) {
-  await db.collection("chats")
-    .doc(chatId)
-    .collection("mensagens")
-    .doc(mensagemId)
-    .update({
-      lido: true
-    });
+
+
+  await db.collection("chats").doc(chatId).collection("mensagens").doc(mensagemId).update({lido: true});
 
   return obterMensagem(chatId, mensagemId);
 }
+
+
+/* ###### isto pode ser utilizado falta export controller e routes #####
+async function marcarTodasComoLida(chatId, mensagemId) {
+
+  const snapshot = await db.collection("chats").doc(chatId).collection("mensagens").where('lido', '==', false).get();
+
+  const batch = db.batch();
+
+  snapshot.forEach(msg => {
+    batch.collection("chats").doc(chatId).collection("mensagens").doc(msg.id).update({lido: true});
+  });
+
+  await batch.commit();
+
+  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+*/
+
+
 
 async function apagarMensagem(chatId, mensagemId) {
   await db.collection("chats")
@@ -58,6 +68,7 @@ async function apagarMensagem(chatId, mensagemId) {
 }
 
 module.exports = {
+  //marcarTodasComoLida,
   enviarMensagem,
   listarMensagens,
   obterMensagem,

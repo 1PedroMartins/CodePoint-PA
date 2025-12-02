@@ -7,7 +7,7 @@ async function criarItemEntrega({ entregaId, stockLoteId, quantidade, userId }) 
   await stockService.decrementar(stockLoteId, quantidade);
 
   // registar movimento de saída
-  await movService.registarMovimento({
+  await movService.registarMovimento({ // rever
     tipo: "SAIDA",
     quantidade,
     userId,
@@ -23,18 +23,14 @@ async function criarItemEntrega({ entregaId, stockLoteId, quantidade, userId }) 
     stockLoteId,
     quantidade,
     criadoEm: new Date()
+    // adicionar estado ??
   });
 
   return { id: docRef.id, stockLoteId, quantidade };
 }
 
 async function obterItem(entregaId, itemId) {
-  const doc = await db
-    .collection("entregas")
-    .doc(entregaId)
-    .collection("itens")
-    .doc(itemId)
-    .get();
+  const doc = await db.collection("entregas").doc(entregaId).collection("itens").doc(itemId).get();
 
   if (!doc.exists) return null;
 
@@ -42,11 +38,7 @@ async function obterItem(entregaId, itemId) {
 }
 
 async function listarItensEntrega(entregaId) {
-  const snap = await db
-    .collection("entregas")
-    .doc(entregaId)
-    .collection("itens")
-    .get();
+  const snap = await db.collection("entregas").doc(entregaId).collection("itens").get();
 
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
@@ -72,12 +64,7 @@ async function reporAoStock(entregaId, itemId, userId) {
 }
 
 async function apagarItem(entregaId, itemId) {
-  await db
-    .collection("entregas")
-    .doc(entregaId)
-    .collection("itens")
-    .doc(itemId)
-    .delete();
+  await db.collection("entregas").doc(entregaId).collection("itens").doc(itemId).delete();
 }
 
 module.exports = {

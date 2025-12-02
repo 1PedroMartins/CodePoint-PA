@@ -20,7 +20,7 @@ async function gerarRelatorio({ tipo, inicio, fim }) {
       .where("dataRealizada", "<=", fimDate)
       .get();
 
-    resultado.dados.totalEntregas = snap.size;
+    resultado.dados.totalEntregas = snap.size; //rever
   }
 
   // -------------------------
@@ -32,7 +32,7 @@ async function gerarRelatorio({ tipo, inicio, fim }) {
       .where("data", "<=", fimDate)
       .get();
 
-    resultado.dados.movimentosStock = snap.size;
+    resultado.dados.movimentosStock = snap.size; //rever
   }
 
   // -------------------------
@@ -44,12 +44,12 @@ async function gerarRelatorio({ tipo, inicio, fim }) {
       .where("dataSubmissao", "<=", fimDate)
       .get();
 
-    const candidaturas = snap.docs.map(d => d.data());
+    const candidaturas = snap.docs.map(d => d.data()); //rever
 
     resultado.dados.totalCandidaturas = candidaturas.length;
-    resultado.dados.aprovadas = candidaturas.filter(c => c.estado === "APROVADA").length;
-    resultado.dados.negadas = candidaturas.filter(c => c.estado === "NEGADA").length;
-    resultado.dados.pendentes = candidaturas.filter(c => c.estado === "PENDENTE").length;
+    resultado.dados.aprovadas = candidaturas.filter(c => c.estado === "APROVADA").length; //rever
+    resultado.dados.negadas = candidaturas.filter(c => c.estado === "NEGADA").length; //rever
+    resultado.dados.pendentes = candidaturas.filter(c => c.estado === "PENDENTE").length; //rever
   }
 
   // -------------------------
@@ -61,9 +61,7 @@ async function gerarRelatorio({ tipo, inicio, fim }) {
 }
 
 async function listarRelatorios() {
-  const snap = await db.collection("relatorios")
-    .orderBy("geradoEm", "desc")
-    .get();
+  const snap = await db.collection("relatorios").orderBy("geradoEm", "desc").get();
 
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }

@@ -24,22 +24,27 @@ async function listarChatsPorBeneficiario(beneficiarioId) {
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
+
+//talvez tirar
 async function obterChat(id) {
   const doc = await collection.doc(id).get();
   if (!doc.exists) return null;
   return { id: doc.id, ...doc.data() };
 }
 
+
+
 async function atualizarChat(id, data) {
-  const updates = { ...data, ultimaUpdate: new Date() };
-  await collection.doc(id).update(updates);
+
+  await collection.doc(id).update({ultimaUpdate: new Date()})
+
   return obterChat(id);
 }
 
 async function fecharChat(id) {
   await collection.doc(id).update({
     estado: "FECHADO",
-    ultimaUpdate: new Date()
+    ultimaUpdate: new Date() //ver para que é
   });
   return obterChat(id);
 }
@@ -48,7 +53,9 @@ async function apagarChat(id) {
   // apagar mensagens da subcoleção
   const mensagensSnap = await collection.doc(id).collection("mensagens").get();
   for (const msg of mensagensSnap.docs) {
-    await msg.ref.delete();
+    idMsg = msg.id
+
+    collection.doc(idMsg).collection("mensagens").delete(); // trocar por função especifica de mensagem.service
   }
 
   // apagar o chat

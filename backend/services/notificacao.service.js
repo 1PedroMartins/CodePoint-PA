@@ -3,7 +3,7 @@ const collection = db.collection("notificacoes");
 
 async function criarNotificacao(data) {
   const notificacao = {
-    destinatarioId: data.destinatarioId,
+    destinatarioId: data.destinatarioId, // rever isto
     titulo: data.titulo,
     mensagem: data.mensagem,
     tipo: data.tipo || "INFO",
@@ -16,10 +16,7 @@ async function criarNotificacao(data) {
 }
 
 async function listarNotificacoes(destinatarioId) {
-  const snap = await collection
-    .where("destinatarioId", "==", destinatarioId)
-    .orderBy("dataEnvio", "desc")
-    .get();
+  const snap = await collection.where("destinatarioId", "==", destinatarioId).orderBy("dataEnvio", "desc").get();
 
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
